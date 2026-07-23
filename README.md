@@ -1,0 +1,1 @@
+A beginner-friendly fitness tracking app designed to help new lifters understand how to train, track their progress, and know exactly what to do next. The app combines simple workout logging with progressive overload guidance, exercise education, and performance tracking to remove confusion from strength training.
