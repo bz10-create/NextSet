@@ -1,0 +1,97 @@
+Build a responsive web app called “Lift Simple” for complete beginners learning strength training.
+
+The app should be extremely simple and friendly, with no advanced fitness jargon. Its main purpose is to help users log workouts and gradually lift more weight over time.
+
+Core features:
+
+User accounts
+
+Email/password sign-up and login.
+
+Each user’s workouts and progress are private.
+
+Exercises
+
+Include a starter exercise library: squat, deadlift, bench press, overhead press, barbell row, lat pulldown, leg press, dumbbell curl, triceps pushdown, and plank.
+
+Users can also create custom exercises.
+
+Each exercise should have a name, category, optional notes, and a default unit of pounds. Design the data model so kilograms can be supported later.
+
+Workout logging
+
+A user can create a workout, give it a date and optional title, and add exercises.
+
+For each exercise, users log sets with:
+
+weight
+
+reps
+
+optional notes
+
+Make logging fast on mobile: large buttons, minimal typing, and an “add set” action.
+
+When a user adds an exercise, show the sets from the most recent previous workout that included that exercise. Clearly label this “Last time” so users can try to beat or match it for progressive overload.
+
+Allow users to edit and delete sets before saving a workout.
+
+One-rep max
+
+Estimate one-rep max automatically for weighted exercises using the Epley formula:estimated 1RM = weight × (1 + reps / 30)
+
+Show the best estimated 1RM for each exercise.
+
+Clearly label it as an estimate.
+
+Progress
+
+Create a simple progress page with charts or clear summaries by exercise.
+
+Free-plan users can see progress compared with last week only.
+
+Premium-plan users can see progress from every recorded workout and choose longer date ranges.
+
+For now, implement plan access with a demo subscription toggle in account/settings; do not integrate real payments yet.
+
+Clearly show locked premium features, but do not make the app frustrating to use.
+
+Beginner experience
+
+Dashboard should focus on one primary action: “Start a workout.”
+
+After a workout, show a short encouraging summary, such as “You added 5 lb to your bench press since last time.”
+
+Use plain language. Avoid terms like volume, RPE, mesocycle, or hypertrophy unless explained.
+
+Include a short empty-state message explaining that users can start with light weights and focus on good form.
+
+Do not provide medical advice or claim to replace a coach.
+
+Design:
+
+Clean, calm, modern fitness app.
+
+Mobile-first, with a responsive desktop layout.
+
+High contrast, accessible typography, large touch targets.
+
+Use a simple neutral palette with one energizing accent color.
+
+Keep screens uncluttered and beginner-friendly.
+
+Technical requirements:
+
+Build a full-stack web app with a persistent database.
+
+Use a clean, maintainable component structure.
+
+Include seeded demo exercises and a demo user/workout if helpful for testing.
+
+Create the database schema for users, workouts, workout exercises, sets, exercises, and subscription plan.
+
+Add basic validation: weights and reps must be positive, and reps should be reasonable.
+
+Build the MVP completely before adding social, AI coaching, nutrition, or complicated workout-program features.
+
+Start by showing the proposed app structure and database schema, then implement the MVP.

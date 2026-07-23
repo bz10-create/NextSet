@@ -1,0 +1,911 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Lift Simple API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: exercises
+    description: Exercise library
+  - name: workouts
+    description: Workout logging
+  - name: sets
+    description: Set logging within workouts
+  - name: progress
+    description: Progress and analytics
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # Auth
+  /auth/register:
+    post:
+      operationId: registerUser
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRegistration"
+      responses:
+        "201":
+          description: User created and session started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "400":
+          description: Validation error
+        "409":
+          description: Email already in use
+
+  /auth/login:
+    post:
+      operationId: loginUser
+      tags: [auth]
+      summary: Log in with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLogin"
+      responses:
+        "200":
+          description: Logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      operationId: logoutUser
+      tags: [auth]
+      summary: Log out current user
+      responses:
+        "204":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+
+  /auth/me/plan:
+    patch:
+      operationId: updateUserPlan
+      tags: [auth]
+      summary: Toggle subscription plan (demo)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlanUpdate"
+      responses:
+        "200":
+          description: Plan updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+
+  # Exercises
+  /exercises:
+    get:
+      operationId: listExercises
+      tags: [exercises]
+      summary: List all exercises (library + user custom)
+      responses:
+        "200":
+          description: List of exercises
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Exercise"
+    post:
+      operationId: createExercise
+      tags: [exercises]
+      summary: Create a custom exercise
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExerciseInput"
+      responses:
+        "201":
+          description: Exercise created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exercise"
+        "400":
+          description: Validation error
+
+  /exercises/{id}:
+    get:
+      operationId: getExercise
+      tags: [exercises]
+      summary: Get a single exercise
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Exercise
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exercise"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateExercise
+      tags: [exercises]
+      summary: Update a custom exercise
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExerciseUpdate"
+      responses:
+        "200":
+          description: Updated exercise
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exercise"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteExercise
+      tags: [exercises]
+      summary: Delete a custom exercise
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /exercises/{id}/best:
+    get:
+      operationId: getExerciseBest
+      tags: [exercises]
+      summary: Get best 1RM estimate and personal record for an exercise
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Best performance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExerciseBest"
+        "404":
+          description: Not found
+
+  # Workouts
+  /workouts:
+    get:
+      operationId: listWorkouts
+      tags: [workouts]
+      summary: List workouts for current user
+      responses:
+        "200":
+          description: List of workouts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Workout"
+    post:
+      operationId: createWorkout
+      tags: [workouts]
+      summary: Create a new workout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkoutInput"
+      responses:
+        "201":
+          description: Workout created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workout"
+
+  /workouts/{id}:
+    get:
+      operationId: getWorkout
+      tags: [workouts]
+      summary: Get a workout with all exercises and sets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Full workout detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutDetail"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateWorkout
+      tags: [workouts]
+      summary: Update a workout title or date
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkoutUpdate"
+      responses:
+        "200":
+          description: Updated workout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workout"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteWorkout
+      tags: [workouts]
+      summary: Delete a workout
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /workouts/{id}/complete:
+    post:
+      operationId: completeWorkout
+      tags: [workouts]
+      summary: Mark a workout as complete and get encouraging summary
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Workout summary with encouraging message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutSummary"
+        "404":
+          description: Not found
+
+  /workouts/{id}/exercises:
+    post:
+      operationId: addExerciseToWorkout
+      tags: [workouts]
+      summary: Add an exercise to a workout
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkoutExerciseInput"
+      responses:
+        "201":
+          description: Exercise added with last-time sets for reference
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutExerciseDetail"
+        "404":
+          description: Not found
+
+  /workouts/{id}/exercises/{workoutExerciseId}:
+    delete:
+      operationId: removeExerciseFromWorkout
+      tags: [workouts]
+      summary: Remove an exercise from a workout
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: workoutExerciseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Removed
+        "404":
+          description: Not found
+
+  # Sets
+  /workout-exercises/{workoutExerciseId}/sets:
+    post:
+      operationId: addSet
+      tags: [sets]
+      summary: Add a set to a workout exercise
+      parameters:
+        - name: workoutExerciseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetInput"
+      responses:
+        "201":
+          description: Set added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutSet"
+        "400":
+          description: Validation error
+
+  /sets/{id}:
+    patch:
+      operationId: updateSet
+      tags: [sets]
+      summary: Update a set
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetUpdate"
+      responses:
+        "200":
+          description: Updated set
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutSet"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteSet
+      tags: [sets]
+      summary: Delete a set
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  # Progress
+  /progress:
+    get:
+      operationId: getProgress
+      tags: [progress]
+      summary: Get progress data for all exercises
+      parameters:
+        - name: exerciseId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: range
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [week, month, three_months, six_months, year, all]
+      responses:
+        "200":
+          description: Progress data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressData"
+
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [progress]
+      summary: Get dashboard summary stats for current user
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    # Auth schemas
+    UserRegistration:
+      type: object
+      required: [email, password, name]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+          minLength: 8
+        name:
+          type: string
+          minLength: 1
+
+    UserLogin:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    PlanUpdate:
+      type: object
+      required: [plan]
+      properties:
+        plan:
+          type: string
+          enum: [free, premium]
+
+    User:
+      type: object
+      required: [id, email, name, plan, createdAt]
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
+        plan:
+          type: string
+          enum: [free, premium]
+        createdAt:
+          type: string
+          format: date-time
+
+    AuthResult:
+      type: object
+      required: [user]
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+
+    # Exercise schemas
+    Exercise:
+      type: object
+      required: [id, name, category, unit, isCustom, movementType]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+          enum: [lower_body, upper_body, back, shoulders, arms, core, full_body]
+        notes:
+          type: ["string", "null"]
+        unit:
+          type: string
+          enum: [lbs, kg]
+        isCustom:
+          type: boolean
+        userId:
+          type: ["integer", "null"]
+        targetRepMin:
+          type: integer
+          default: 6
+        targetRepMax:
+          type: integer
+          default: 12
+        movementType:
+          type: string
+          enum: [upper_body, lower_body]
+          default: upper_body
+
+    ExerciseInput:
+      type: object
+      required: [name, category, movementType]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        category:
+          type: string
+          enum: [lower_body, upper_body, back, shoulders, arms, core, full_body]
+        notes:
+          type: string
+        unit:
+          type: string
+          enum: [lbs, kg]
+          default: lbs
+        targetRepMin:
+          type: integer
+          default: 6
+        targetRepMax:
+          type: integer
+          default: 12
+        movementType:
+          type: string
+          enum: [upper_body, lower_body]
+          default: upper_body
+
+    ExerciseUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        category:
+          type: string
+          enum: [lower_body, upper_body, back, shoulders, arms, core, full_body]
+        notes:
+          type: ["string", "null"]
+        unit:
+          type: string
+          enum: [lbs, kg]
+        targetRepMin:
+          type: integer
+        targetRepMax:
+          type: integer
+        movementType:
+          type: string
+          enum: [upper_body, lower_body]
+
+    ExerciseBest:
+      type: object
+      required: [exerciseId]
+      properties:
+        exerciseId:
+          type: integer
+        exerciseName:
+          type: ["string", "null"]
+        bestOneRepMax:
+          type: ["number", "null"]
+        bestWeight:
+          type: ["number", "null"]
+        bestReps:
+          type: ["integer", "null"]
+        achievedAt:
+          type: ["string", "null"]
+          format: date-time
+
+    # Workout schemas
+    Workout:
+      type: object
+      required: [id, userId, date, isCompleted, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        title:
+          type: ["string", "null"]
+        date:
+          type: string
+          format: date
+        isCompleted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    WorkoutInput:
+      type: object
+      required: [date]
+      properties:
+        title:
+          type: string
+        date:
+          type: string
+          format: date
+
+    WorkoutUpdate:
+      type: object
+      properties:
+        title:
+          type: ["string", "null"]
+        date:
+          type: string
+          format: date
+
+    WorkoutSet:
+      type: object
+      required: [id, workoutExerciseId, weight, reps, setOrder]
+      properties:
+        id:
+          type: integer
+        workoutExerciseId:
+          type: integer
+        weight:
+          type: number
+          minimum: 0
+        reps:
+          type: integer
+          minimum: 1
+          maximum: 9999
+        notes:
+          type: ["string", "null"]
+        setOrder:
+          type: integer
+        estimatedOneRepMax:
+          type: ["number", "null"]
+        isCompleted:
+          type: boolean
+          default: false
+
+    SetInput:
+      type: object
+      required: [weight, reps]
+      properties:
+        weight:
+          type: number
+          minimum: 0
+        reps:
+          type: integer
+          minimum: 1
+          maximum: 9999
+        notes:
+          type: string
+        isCompleted:
+          type: boolean
+          default: false
+
+    SetUpdate:
+      type: object
+      properties:
+        weight:
+          type: number
+          minimum: 0
+        reps:
+          type: integer
+          minimum: 1
+          maximum: 9999
+        notes:
+          type: ["string", "null"]
+        isCompleted:
+          type: boolean
+
+    WorkoutExerciseInput:
+      type: object
+      required: [exerciseId]
+      properties:
+        exerciseId:
+          type: integer
+
+    WorkoutExerciseDetail:
+      type: object
+      required: [id, workoutId, exerciseId, exercise, sets, lastTimeSets]
+      properties:
+        id:
+          type: integer
+        workoutId:
+          type: integer
+        exerciseId:
+          type: integer
+        exercise:
+          $ref: "#/components/schemas/Exercise"
+        sets:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkoutSet"
+        lastTimeSets:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkoutSet"
+
+    WorkoutDetail:
+      type: object
+      required: [id, userId, date, isCompleted, createdAt, exercises]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        title:
+          type: ["string", "null"]
+        date:
+          type: string
+          format: date
+        isCompleted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        exercises:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkoutExerciseDetail"
+
+    WorkoutSummary:
+      type: object
+      required: [workoutId, message, highlights]
+      properties:
+        workoutId:
+          type: integer
+        message:
+          type: string
+        highlights:
+          type: array
+          items:
+            type: string
+        totalSets:
+          type: integer
+        totalExercises:
+          type: integer
+
+    # Progress schemas
+    ProgressPoint:
+      type: object
+      required: [date, value]
+      properties:
+        date:
+          type: string
+          format: date
+        value:
+          type: number
+        weight:
+          type: ["number", "null"]
+        reps:
+          type: ["integer", "null"]
+
+    ExerciseProgress:
+      type: object
+      required: [exerciseId, exerciseName, dataPoints]
+      properties:
+        exerciseId:
+          type: integer
+        exerciseName:
+          type: string
+        dataPoints:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProgressPoint"
+        bestOneRepMax:
+          type: ["number", "null"]
+        trend:
+          type: ["string", "null"]
+          enum: [up, down, flat, null]
+        isPremiumLocked:
+          type: boolean
+
+    ProgressData:
+      type: object
+      required: [exercises, range]
+      properties:
+        exercises:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExerciseProgress"
+        range:
+          type: string
+
+    DashboardStats:
+      type: object
+      required: [totalWorkouts, thisWeekWorkouts, recentWorkouts, topExercises]
+      properties:
+        totalWorkouts:
+          type: integer
+        thisWeekWorkouts:
+          type: integer
+        currentStreak:
+          type: integer
+        recentWorkouts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Workout"
+        topExercises:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExerciseBest"
+        lastWorkoutSummary:
+          type: ["string", "null"]

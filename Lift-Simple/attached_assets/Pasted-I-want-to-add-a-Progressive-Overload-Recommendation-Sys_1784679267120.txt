@@ -1,0 +1,120 @@
+I want to add a Progressive Overload Recommendation System to the fitness web app.
+
+The goal:
+Help beginners know exactly what weight and reps to aim for during their next workout based on their previous performance.
+
+Implement a double progression system.
+
+Core logic:
+
+1. Each exercise has:
+- Exercise name
+- Weight used
+- Sets completed
+- Reps completed for each set
+- Target rep range
+
+Default target rep range:
+6-12 reps
+
+2. After a user completes an exercise, analyze their performance.
+
+Progression rules:
+
+IF the user completes all sets at the top of the rep range (12 reps):
+- Recommend increasing weight next session
+- Upper body exercises: +5 lbs
+- Lower body exercises: +5-10 lbs
+- Reset recommended reps back toward the lower end of the range (around 6-8 reps)
+
+Example:
+Previous:
+Bench Press
+135 lbs
+3 sets:
+12,12,12
+
+Recommendation:
+Increase to 140 lbs
+Aim for:
+8,8,8 or 3x8
+
+---
+
+IF the user does not hit 12 reps on all sets:
+- Keep the same weight
+- Recommend adding 1 rep per set if possible
+
+Example:
+Previous:
+Bench Press
+185 lbs
+3 sets:
+8,8,7
+
+Recommendation:
+Stay at 185 lbs
+Aim for:
+9,8,8
+
+---
+
+IF performance decreases:
+Example:
+Previous:
+185 lbs x 10,10,10
+
+Current:
+185 lbs x 8,7,7
+
+Recommend:
+Keep weight the same
+Try to match or beat previous performance before increasing.
+
+3. Add a "Next Workout Goal" section after each exercise.
+
+Example UI:
+
+Bench Press
+Last workout:
+185 lbs
+3 x 10
+
+Next goal:
+185 lbs
+Try:
+3 x 11
+
+Progress:
++3 reps from last workout
+
+---
+
+4. Add progress tracking:
+Show:
+- Total volume increase
+- Personal records
+- Weight progression over time
+
+Volume formula:
+sets × reps × weight
+
+Example:
+3 sets × 10 reps × 185 lbs = 5550 lbs total volume
+
+Display:
+"Your bench volume increased by 8% this month"
+
+---
+
+5. Keep the UI simple and beginner friendly.
+Do not overwhelm users with complicated graphs.
+Prioritize:
+- Clear next step
+- Simple recommendations
+- Encouragement
+
+Make the system modular so later we can add:
+- AI workout adjustments
+- Different goals (strength/hypertrophy)
+- Different rep ranges

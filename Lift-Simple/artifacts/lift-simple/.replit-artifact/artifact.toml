@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Lift Simple"
+version = "1.0.0"
+id = "artifacts/lift-simple"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25541
+
+[services.development]
+run = "pnpm --filter @workspace/lift-simple run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/lift-simple", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/lift-simple/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25541"
+BASE_PATH = "/"

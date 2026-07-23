@@ -1,0 +1,61 @@
+I tested the app and found several issues with workout tracking and progression.
+Please prioritize improving the core workout experience.
+
+1. Make it clearer how to add multiple sets
+The ability to add multiple sets already works (the weight/reps form stays active after each add — hitting "+" again logs another set for the same exercise). The problem is discoverability, not functionality: it's not obvious to a new user that they can keep adding sets this way. Add a clear visual cue — e.g. persistent helper text like "Add another set" near the form, or auto-advance focus back to the weight field after logging a set — so users don't think logging is limited to one set. Do not rebuild the logging flow or change how sets are added/stored.
+
+Each set should track:
+- weight
+- reps
+- completion status (a checkbox to mark a set done during an active workout — this needs a new field on the sets table, since it doesn't exist today; it's about live workout tracking, not editing past logs)
+
+Example:
+Bench Press
+Set 1: 185 lbs x 8 reps
+Set 2: 185 lbs x 7 reps
+Set 3: 185 lbs x 6 reps
+
+Make the interface simple and beginner friendly.
+
+---
+
+2. Progressive overload recommendations
+When a user completes an exercise and performs that exercise again in the future, do not only show the previous workout. Also show what they should AIM for next time.
+
+Use the progressive overload system:
+
+Example:
+Previous workout:
+Bench Press
+185 lbs
+3 sets: 8,8,7
+
+Next workout goal:
+Bench Press
+185 lbs
+Aim for: 9,8,8
+Reason: "Try to add 1 rep compared to your previous workout."
+
+If the user reaches the top of the rep range: recommend increasing weight.
+
+Assume a default target rep range of 6–12 unless an exercise specifies otherwise. If there's no existing field for this, add a targetRepRange (or similar) field to exercises rather than hardcoding the range invisibly in the recommendation logic.
+
+If the user has no previous performance for an exercise (first time doing it), do not show a "next goal" — either show nothing or a simple starter suggestion, but make this an explicit, intentional case rather than an undefined one.
+
+---
+
+3. Personal record naming
+Currently personal records display:
+"Exercise #3 PR"
+
+Replace this with the actual exercise name.
+
+Examples:
+Instead of: Exercise #3 PR
+Display: Bench Press PR, Leg Press PR, Incline Dumbbell Press PR
+
+Make sure all exercise tracking uses the actual exercise name.
+
+---
+
+Do not change the existing design style. Keep the clean beginner-friendly layout.

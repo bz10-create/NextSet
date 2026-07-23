@@ -1,0 +1,26 @@
+I tested the app and found several backend/infrastructure issues, separate from the progressive overload work. Please fix these without changing any user-facing behavior, UI, or design.
+
+1. Fix N+1 queries in progress.ts (both the /progress and /dashboard routes)
+Right now, for each exercise the code loops over every workout and does a separate db.select() for the workout_exercise row, then another for its sets. Replace this with joined queries — pull workouts, workout_exercises, exercises, and sets in one or two queries using joins, then group the results in application code instead of querying per iteration. The output shape returned to the frontend must stay identical.
+
+2. Centralize date-range and streak logic
+getRangeStartDate and the streak calculation in the dashboard route each reconstruct dates manually with new Date(), .setDate(), and .toISOString().split("T")[0]. This is timezone-fragile — a workout logged late at night can land on the wrong side of a UTC day boundary and break "this week" / streak counts. Create a single shared date-utility module used by both, and make an explicit decision (and comment it) about whether ranges are computed in UTC or the user's local time. Don't change the actual range values returned for existing test cases (7 days, 1 month, etc.) — just make the computation consistent and centralized.
+
+3. Decouple estimatedOneRepMax from write-time storage
+The 1RM is currently computed once and stored on the sets row at insert time. If the formula ever changes, every historical set keeps a stale value with no way to recompute it. Either (a) compute 1RM on read instead of storing it, or (b) keep it stored but add a script/endpoint that recalculates and updates all existing rows when the formula changes. Pick whichever is simpler given the current codebase and explain the tradeoff briefly in a comment.
+
+4. Add unit tests for the pure calculation functions
+No tests exist anywhere in the repo. Add tests for:
+- epleyOneRepMax (normal case, reps === 1 edge case)
+- the trend calculation in /progress (values right at and just inside/outside the 2% up/down thresholds)
+- the shared date-range helper from #2 (boundary dates, month/year rollovers)
+- the streak calculation (consecutive days, a gap, a single-day streak)
+Use whatever test runner is already configured in the repo, or Vitest if none is set up.
+
+5. Flag the plan column as a placeholder
+plan on the users table is a free/premium string with a manual toggle in Settings and no real billing behind it. Add a clear code comment on the column and the toggle noting this is a demo flag, not connected to payments, so it doesn't get treated as production-ready later.
+
+6. Clean up repo exports going forward
+The last export included the full .git history and the pnpm store. Check .gitignore and whatever export/zip step Replit uses to make sure .git, node_modules, and the pnpm store are excluded from future downloads.
+
+Do not touch the progressive overload feature work, the workout logging UI, or anything covered in the earlier prompt — this is backend/infra only.

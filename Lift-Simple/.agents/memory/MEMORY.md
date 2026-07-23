@@ -1,0 +1,2 @@
+- [OpenAPI date format issue](openapi-date-format.md) — `format: date` generates `zod.coerce.date()` returning JS Date objects; always convert with a `toDateStr()` helper before inserting into Drizzle `date` columns.
+- [Clerk JIT user provisioning](clerk-jit-provisioning.md) — requireAuth middleware auto-creates local user records from Clerk session claims on first API call; no separate register endpoint needed.
